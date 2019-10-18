@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include "md5.h" 
+#include "rainbowFuncs.h"
 
 // input : ./prog filename
 
@@ -15,7 +16,6 @@ int* hash_pointer, * pass_pointer, * temp;
 int n, result, * temp;
 MD5_CTX mdContext;  // needed to compute MD5
 
-typedef enum { false, true } bool;
 
 check_hash(char* hash)
 {
@@ -29,38 +29,6 @@ check_hash(char* hash)
 	};
 };
 
-// Increment the password and return the number of carry-overs
-int increment_pass(char* pass)
-{
-	bool updated;
-	int index = 0;
-	do
-	{
-		updated = false;
-		if (pass[index] == 'z')
-		{
-			pass[index] = '0';
-			updated = true;
-			index++;
-		}
-		else if (pass[index] == '9')
-		{
-			pass[index] = 'A';
-		}
-		else if (pass[index] == 'Z')
-		{
-			pass[index] = 'a';
-		}
-		else
-		{
-			pass[index] = pass[index] + 1;
-		}
-
-	} while (updated && index < 4);
-
-	return index;
-}
-
 int getHash()
 {
 	MD5Init(&mdContext);  // compute MD5 of password
@@ -70,6 +38,24 @@ int getHash()
 
 	return *temp;
 }
+
+// TODO
+// returns which index the final hash is located at
+// returns -1 if it is not in the table
+int getIndexOfHash(int hash)
+{
+	return -1;
+}
+
+
+// TODO
+// Scans the entry at the given index for the intHash given
+// sets the password to the password immediately preceeding the hash
+searchRainbowEntry(int index, int intHash, char * pass)
+{
+
+}
+
 
 main(int argc, char* argv[])
 {
@@ -95,21 +81,22 @@ main(int argc, char* argv[])
 
 	int carries;
 	bool success = false;
-	do {
+	for (int i = 0; i < TABLE_WIDTH; ++i)
+	{
 
 		result = getHash(pass); // result is 32 bits of MD5 -- there is a BUG here, oh well.
 
-		if (result == intHash)
+		int index = getIndexOfHash(result);
+		if (index != -1)
 		{
+			searchRainbowEntry(index, intHash, pass);
 			success = true;
 			break;
 		}
-		carries = increment_pass(pass);
 
-		if (carries >= 3)
-			printf("Pass: %s Hash: %x\n", pass, result); // print a human readable version of hash (using hex conversion)
+		inverseHash(result, pass);
 
-	} while (carries < 4);
+	}
 
 	if (success)
 	{

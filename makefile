@@ -6,11 +6,12 @@ ALL: HASH BRUTE RAINBOW
 HASH: hash.c MD5
 	gcc -o hash hash.c
 	
-BRUTE: brute_force.c MD5
+BRUTE: brute_force.c rainbowFuncs.h MD5
 	gcc -o brute_force brute_force.c
 	
-RAINBOW: rainbow.c MD5
+RAINBOW: rainbow.c rainbowGen.c rainbowFuncs.h MD5
 	gcc -o rainbow rainbow.c
+	gcc -o rainbowGen rainbowGen.c
 	
 
 MD5: md5.h
