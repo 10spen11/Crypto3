@@ -18,9 +18,18 @@ MD5_CTX mdContext;  // needed to compute MD5
 
 
 
-store(char * pass, int hash)
+void store(char* pass, int hash)
 {
 	// TODO make it store the values
+
+    FILE *fptr;
+    fptr = fopen("./rainbow-hashes.txt", "a");
+    if(fptr == NULL)
+    {
+        printf("Problems opening the rainbow-hashing file!");
+    }
+    fprintf(fptr, "%s %d\n", pass, hash);
+    fclose(fptr);
 }
 
 
@@ -49,14 +58,14 @@ check_hash(char * hash)
 // returns the hash that results from the end of a rainbow table
 int getFinalHash(char* pass)
 {
-	int hash;
-	char tempPass[4];
-	for (int i = 0; i < 4; ++i)
+	int hash = 0;
+	char tempPass[5];
+	for (int i = 0; i <= 4; ++i)
 		tempPass[i] = pass[i];
-
+	
 	for (int i = 0; i < TABLE_WIDTH; ++i)
 	{
-		hash = getHash(tempPass);
+		hash = getHash();
 		inverseHash(hash, tempPass);
 	}
 
@@ -65,16 +74,20 @@ int getFinalHash(char* pass)
 
 main(int argc, char *argv[])
 {
+    pass_pointer = (int*)pass; // get an int pointer to the password store
+
+    for (int i = 0; i < 4; ++i)
+    {
+        pass[i] = '0'; // all 0s in password field
+    }
+
 	int carries;
 
 	for (int i = 0; i < TABLE_HEIGHT; ++i)
 	{
 		result = getFinalHash(pass); // result is 32 bits of MD5 -- there is a BUG here, oh well.
-		store(pass, result);
-
-
+		store(&pass, result);
 		carries = increment_pass(pass);
-
 	}
 
 // Note if you store hashes, do not use human readable HEX, 
