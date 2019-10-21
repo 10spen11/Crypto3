@@ -34,7 +34,7 @@ void load_hash_table()
 	for(int i = 0; i < TABLE_HEIGHT; ++i)
 	{
 		fscanf(fptr, "%s %d\n", &main_table[i].pass, &main_table[i].hash);
-		printf("\nString : %s int : %d", main_table[i].pass, main_table[i].hash);
+		printf("\nString : %s int : %d\n", main_table[i].pass, main_table[i].hash);
 	}
 
 	fclose(fptr);
@@ -56,7 +56,14 @@ int getIndexOfHash(int hash)
 // sets the password to the password immediately preceeding the hash
 void searchRainbowEntry(int index, int intHash, char * pass)
 {
-
+    if(main_table[index].hash == intHash)
+    {
+        pass = main_table->pass;
+    }
+    else
+    {
+        printf("SearchRainbowEntry failed");
+    }
 }
 
 
