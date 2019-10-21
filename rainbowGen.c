@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "md5.h" 
 #include "rainbowFuncs.h"
 
 // input : ./prog filename
@@ -12,49 +11,59 @@
 char pass[5]; // 4 character password, with null at end for printing
 char hash[8]; // 8 character password
 int intHash; // int representation of the hash
-int *hash_pointer, * pass_pointer, * temp;
+int *hash_pointer, * temp;
 int n, *temp;
 unsigned int result;
-MD5_CTX mdContext;  // needed to compute MD5
 
 
+struct hash_entry {
+	char pass[5];
+	int hash;
+} main_table[TABLE_HEIGHT];
+int mainTableIndex = 0;
+
+void sortTable();
+
+int compareEntries(const void* a, const void* b)
+{
+	struct hash_entry* a2 = (struct hash_entry*) a;
+	struct hash_entry* b2 = (struct hash_entry*) b;
+	return (b2->hash > a2->hash)?-1:1;
+}
 
 void store(char* pass, int hash)
 {
 	// TODO make it store the values
-
-    FILE *fptr;
-    fptr = fopen("./rainbow-hashes.txt", "a");
-    if(fptr == NULL)
-    {
-        printf("Problems opening the rainbow-hashing file!");
-    }
-    fprintf(fptr, "%s %d\n", pass, hash);
-    fclose(fptr);
+	for (int i = 0; i < 5; ++i)
+		main_table[mainTableIndex].pass[i] = pass[i];
+	main_table[mainTableIndex].hash = hash;
+	mainTableIndex++;
 }
 
-
-unsigned int getHash(int * pass_pointer)
+void storeFinal()
 {
-	MD5Init(&mdContext);  // compute MD5 of password
-	MD5Update(&mdContext, pass_pointer, 4);
-	MD5Final(&mdContext);
-	temp = (unsigned int*)& mdContext.digest[12];
+	FILE* fptr;
+	sortTable();
 
-	return *temp;
+	fptr = fopen("./rainbow-hashes.txt", "w");
+	if (fptr == NULL)
+	{
+		printf("Problems opening the rainbow-hashing file!");
+		return;
+	}
+	for (int i = 0; i < TABLE_HEIGHT; ++i)
+	{
+		fprintf(fptr, "%s %d\n", main_table[i].pass, main_table[i].hash);
+	}
+	
+	fclose(fptr);
 }
 
-void check_hash(char * hash)
+void sortTable()
 {
-  int i = 0;
-  for (i=0;i<8;i++) { 
-       if (!(((hash[i] >= 'a') && (hash [i] <= 'f'))
-             || ((hash[i] >= '0') && (hash [i] <= '9')))) {
-                   printf("Hash not as per specifications\n");
-                   exit(0);
-       };
-  };
-};
+	qsort(main_table, TABLE_HEIGHT, sizeof(struct hash_entry), compareEntries);
+	
+}
 
 // returns the hash that results from the end of a rainbow table
 int getFinalHash(char* pass)
@@ -64,13 +73,13 @@ int getFinalHash(char* pass)
 	for (int i = 0; i <= 4; ++i)
 		tempPass[i] = pass[i];
 
-	pass_pointer = (int*)tempPass; // get an int pointer to the password store
-
 
 	for (int i = 0; i < TABLE_WIDTH; ++i)
 	{
-		hash = getHash(pass_pointer);
+		hash = getHash(tempPass);
 		inverseHash(hash, tempPass);
+
+		
 	}
 
 	return hash;
@@ -95,6 +104,8 @@ void main(int argc, char *argv[])
 		store(pass, result);
 		carries = increment_pass(pass);
 	}
+
+	storeFinal();
 
 // Note if you store hashes, do not use human readable HEX, 
 // but write the integer to file, raw bits.

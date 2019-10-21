@@ -61,10 +61,10 @@ int increment_pass(char* pass)
 	return index;
 }
 
-int getHash()
+int getHash(char* pass)
 {
 	MD5Init(&mdContext);  // compute MD5 of password
-	MD5Update(&mdContext, pass_pointer, 4);
+	MD5Update(&mdContext, pass, 4);
 	MD5Final(&mdContext);
 	temp = (int*)& mdContext.digest[12];
 
@@ -87,8 +87,6 @@ main(int argc, char *argv[])
 
 	for (int i = 0; i < 4; ++i)
 		pass[i] = '0'; // all 0s in password field
-	
-	pass_pointer = (int*)pass; // get an int pointer to the password store
 
 	pass[4] = '\0';
 
