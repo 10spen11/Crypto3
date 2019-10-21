@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "md5.h" 
+
 #include "rainbowFuncs.h"
 
 // input : ./prog filename
@@ -14,30 +14,33 @@ char hash[8]; // 8 character password
 int intHash; // int representation of the hash
 int* hash_pointer, * pass_pointer, * temp;
 int n, result, * temp;
-MD5_CTX mdContext;  // needed to compute MD5
 
 
-check_hash(char* hash)
+
+struct hash_entry {
+	char pass[5];
+	int hash;
+} main_table[TABLE_HEIGHT];
+
+void load_hash_table()
 {
+	FILE* fptr;
+	fptr = fopen("./rainbow-hashes.txt", "r");
+	if (fptr == NULL)
+	{
+		printf("Problems opening the rainbow-hashing file!");
+	}
 	int i = 0;
-	for (i = 0; i < 8; i++) {
-		if (!(((hash[i] >= 'a') && (hash[i] <= 'f'))
-			|| ((hash[i] >= '0') && (hash[i] <= '9')))) {
-			printf("Hash not as per specifications\n");
-			exit(0);
-		};
-	};
-};
+	for(int i = 0; i < TABLE_HEIGHT; ++i)
+	{
+		fscanf(fptr, "%s %d\n", &main_table[i].pass, &main_table[i].hash);
+		printf("\nString : %s int : %d", main_table[i].pass, main_table[i].hash);
+	}
 
-int getHash()
-{
-	MD5Init(&mdContext);  // compute MD5 of password
-	MD5Update(&mdContext, pass_pointer, 4);
-	MD5Final(&mdContext);
-	temp = (int*)& mdContext.digest[12];
-
-	return *temp;
+	fclose(fptr);
 }
+
+
 
 // TODO
 // returns which index the final hash is located at
@@ -51,14 +54,16 @@ int getIndexOfHash(int hash)
 // TODO
 // Scans the entry at the given index for the intHash given
 // sets the password to the password immediately preceeding the hash
-searchRainbowEntry(int index, int intHash, char * pass)
+void searchRainbowEntry(int index, int intHash, char * pass)
 {
 
 }
 
 
-main(int argc, char* argv[])
+void main(int argc, char* argv[])
 {
+	load_hash_table();
+
 	hash_pointer = (int*)hash; // get an int pointer to the password store
 	*hash_pointer = 0; // all nulls in password field
 	if (argc != 1) { printf("Usage: No Arguments\n", argv[0]); exit(0); };
