@@ -1,7 +1,37 @@
-const int TABLE_HEIGHT = 5000;
-const int TABLE_WIDTH = 62 * 62;
+#include "md5.h" 
+
+#define TABLE_HEIGHT 500
+#define TABLE_WIDTH 20
+
+
 
 typedef enum { false, true } bool;
+
+
+void check_hash(char* hash)
+{
+	int i = 0;
+	for (i = 0; i < 8; i++) {
+		if (!(((hash[i] >= 'a') && (hash[i] <= 'f'))
+			|| ((hash[i] >= '0') && (hash[i] <= '9')))) {
+			printf("Hash not as per specifications\n");
+			exit(0);
+		};
+	};
+};
+
+unsigned int getHash(char* pass)
+{
+	MD5_CTX mdContext;  // needed to compute MD5
+	unsigned int *temp;
+
+	MD5Init(&mdContext);  // compute MD5 of password
+	MD5Update(&mdContext, pass, 4);
+	MD5Final(&mdContext);
+	temp = (int*)& mdContext.digest[12];
+
+	return *temp;
+}
 
 // Increment the password and return the number of carry-overs
 int increment_pass(char* pass)
@@ -38,33 +68,38 @@ int increment_pass(char* pass)
 // returns the char associated with the number, i.e. the index used to determine its use
 char associatedChar(int num)
 {
+	char selected;
+	//printf("Selected integer: %i ", num);
 	if (0 <= num && num <= 9)
 	{
-		return '0' + num;
+		selected = '0' + num;
 	}
 	else if (10 <= num && num <= 35)
 	{
-		return 'A' + num;
+		selected = 'A' + num - 10;
 	}
 	else if (36 <= num && num <= 61)
 	{
-		return 'a' + num;
+		selected = 'a' + num - 36;
 	}
 	else // Invalid number
 	{
-		return '\0';
+		selected = '\0';
 	}
-
-
+	//printf("Selected character: %c\n", selected);
+	return selected;
 }
 
-inverseHash(int hash, char* reverse)
+void inverseHash(unsigned int hash, char* reverse)
 {
-	hash %= 14776336;
+	//printf("Hash: %d ", hash);
+	//hash %= 14776336;
 
 	for (int i = 0; i < 4; ++i)
 	{
 		reverse[i] = associatedChar(hash % 62);
 		hash /= 62;
 	}
+
+	//printf("Pass: %s\n", reverse);
 }
