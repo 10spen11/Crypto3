@@ -33,7 +33,6 @@ int compareEntries(const void* a, const void* b)
 
 void store(char* pass, int hash)
 {
-	// TODO make it store the values
 	for (int i = 0; i < 5; ++i)
 		main_table[mainTableIndex].pass[i] = pass[i];
 	main_table[mainTableIndex].hash = hash;
@@ -87,10 +86,11 @@ int getFinalHash(char* pass)
 
 void main(int argc, char *argv[])
 {
+	/*
 	FILE* fptr;
 	fptr = fopen("./rainbow-hashes.txt", "w");
 	fclose(fptr);
-
+	*/
     for (int i = 0; i < 4; ++i)
     {
         pass[i] = '0'; // all 0s in password field
